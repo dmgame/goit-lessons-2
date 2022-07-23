@@ -23,3 +23,44 @@ https://github.com/tc39
 -----------------------
 
 ## Common Links
+
+[Візуалізация методу sort](https://www.hackerearth.com/practice/algorithms/sorting/bubble-sort/visualize/)
+
+[Візуалізація методу reduce](http://reduce.surge.sh/)
+
+### Приклад реаалізації методу sort за допомогую цикла
+```js
+ const numbers = [2, 5, 1, 7, 9, 3]
+ 
+ // #1 [2, 1, 5, 7, 3, 9]
+ // #2 [1, 2, 5, 3, 7, *9]
+ // #3 [1, 2, 3, 5, *7, *9]
+ // #3 [1, 2, 3, *5, *7, *9]
+ 
+ // endI - граница основного цикла, это всегда длина массива - 1
+ // endJ - граница вложенного цикла минус текущая итерация основного цикла
+ 
+ // was swap - если они прошел по всему массиву и не поменял местами не один элемент
+ // значит все стоят в нужном порябке и дальше идти по массиву не нужно
+ 
+ function bubbleSort(arr) {
+     for (let i = 0, endI = arr.length - 1; i < endI; i++) {
+         console.log('===================')
+         console.log('i', i, 'endI', endI)
+         console.log('-------------------')
+         let wasSwap = false;
+         for (let j = 0, endJ = endI - i; j < endJ; j++) {
+             console.log('j', j, 'endJ', endJ)
+             if (arr[j] > arr[j + 1]) {
+                 [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+                 wasSwap = true;
+             }
+         }
+         console.log('===================')
+         if (!wasSwap) break;
+     }
+     return arr;
+ };
+ 
+console.log(bubbleSort(numbers))
+```
