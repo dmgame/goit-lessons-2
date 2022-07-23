@@ -24,6 +24,8 @@ https://github.com/tc39
 
 ## Common Links
 
+[Канал з співбесідами](https://www.youtube.com/c/otsobes)
+
 [Візуалізация методу sort](https://www.hackerearth.com/practice/algorithms/sorting/bubble-sort/visualize/)
 
 [Візуалізація методу reduce](http://reduce.surge.sh/)
