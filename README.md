@@ -30,6 +30,8 @@ https://github.com/tc39
 
 [Візуалізація методу reduce](http://reduce.surge.sh/)
 
+[Classes ES5 vs CLasses ES6](https://medium.com/@apalshah/javascript-class-difference-between-es5-and-es6-classes-a37b6c90c7f8)
+
 ### Приклад реаалізації методу sort за допомогую цикла
 ```js
  const numbers = [2, 5, 1, 7, 9, 3]
