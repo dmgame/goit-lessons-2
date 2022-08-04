@@ -17,7 +17,6 @@ const tasks = [
         description: "Some quick example text to build on the card title and make up the bulk of the card's content.",
         priority: 'low',
         is_done: false,
-        is_archived: false,
         expired_at: 1659377827742
     },
     {
@@ -26,7 +25,6 @@ const tasks = [
         description: "Some quick example text to build on the card title and make up the bulk of the card's content.",
         priority: 'medium',
         is_done: false,
-        is_archived: false,
         expired_at: 1659477600000
     },
     {
@@ -35,7 +33,6 @@ const tasks = [
         description: "Some quick example text to build on the card title and make up the bulk of the card's content.",
         priority: 'medium',
         is_done: true,
-        is_archived: false,
         expired_at: 1659377827742
     },
     {
@@ -44,14 +41,20 @@ const tasks = [
         description: "Some quick example text to build on the card title and make up the bulk of the card's content.",
         priority: 'high',
         is_done: false,
-        is_archived: false,
         expired_at: 1659132000000
     }
 ]
 
-const tasksContainer = document.querySelector('.tasks-list')
+function removeTaskHandler(evt) {
+    const { target } = evt
+    const taskEl = target.closest('[data-task-id]')
+    const id = Number(taskEl.dataset.taskId)
+    taskEl.remove()
 
-tasks.forEach((task, index) => {
+    const index = tasks.findIndex((task) => task.id === id)
+    tasks.splice(index, 1)
+}
+function createTaskTemplate(task, index) {
     const priorityClass = task.priority === 'low' ? 
         'text-bg-info' : task.priority === 'medium' ? 'text-bg-warning' : 'text-bg-danger'
     
@@ -70,7 +73,7 @@ tasks.forEach((task, index) => {
     })}`
 
     const template = `
-    <div class="card mb-3 ${borderClass}">
+    <div class="card mb-3 ${borderClass}" data-task-id="${task.id}">
         <div class="card-header d-flex justify-content-between ${textBgClass}">
             <span>Task #${index + 1}</span>
             <span>${dateText}</span>
@@ -87,11 +90,26 @@ tasks.forEach((task, index) => {
                 '<button class="btn btn-outline-primary me-2">Reopen</button>' : 
                 '<button class="btn btn-success me-2">Mark as done</button>'
             }
-            <button class="btn btn-danger">Archive</button>
+            <button class="btn btn-danger" data-action="remove">Remove</button>
         </div>
     </div>
     `
-    
-    tasksContainer.insertAdjacentHTML('beforeend', template)
+
+    return template
+} 
+
+const tasksContainer = document.querySelector('.tasks-list')
+let fullTemplate = ''
+
+// TODO change forEach to reduce
+tasks.forEach((task, index) => {
+    const template = createTaskTemplate(task, index)
+    fullTemplate += template
 })
 
+tasksContainer.insertAdjacentHTML('beforeend', fullTemplate)
+
+const removeBtns = document.querySelectorAll('[data-action="remove"]')
+removeBtns.forEach(
+    btn => btn.addEventListener('click', removeTaskHandler)
+)
