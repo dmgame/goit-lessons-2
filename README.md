@@ -34,6 +34,8 @@ https://github.com/tc39
 
 [Візуалізація подій](http://jsbin.com/valasomeli/edit?html,js,output)
 
+[Каталог патернів проектування](https://refactoring.guru/uk/design-patterns/catalog)
+
 ### Приклад реаалізації методу sort за допомогую цикла
 ```js
  const numbers = [2, 5, 1, 7, 9, 3]
