@@ -9,6 +9,41 @@
     <title>Document</title>
 </head>
 <body>
+    <section class="form-section mt-5">
+        <div class="container">
+            <div class="card w-50">
+                <div class="card-header">
+                    <span>Add new task</span>
+                </div>
+                <div class="card-body">
+                    <form name="add-task">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Task title</label>
+                            <input type="text" class="form-control" id="title" name="task-title">
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Task body</label>
+                            <textarea class="form-control" id="description" name="task-description" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="priority" class="form-label">Task priority</label>
+                            <select class="form-select" id="priority" name="task-priority">
+                                <option selected>Open this select menu</option>
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add task</button>
+                        <button type="reset" class="btn btn-warning ms-2">Reset</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+    <img src="" alt="" id="img">
+    <a href="" id="link"></a>
+    <iframe src="" frameborder="0"></iframe>
     <section class="mt-5">
         <div class="container">
             <div class="tasks-list">
@@ -86,6 +121,7 @@
             </div>
         </div>
     </section>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa" crossorigin="anonymous"></script>
     <script src="./js/app.js"></script>
 </body>
 </html>

@@ -9,7 +9,6 @@
  */
 
 // TODO - Parse date
-
 const tasks = [
     {
         id: 1,
@@ -45,6 +44,8 @@ const tasks = [
     }
 ]
 
+const tasksContainer = document.querySelector('.tasks-list')
+
 function removeTaskHandler(evt) {
     const { target } = evt
     const taskEl = target.closest('[data-task-id]')
@@ -54,6 +55,7 @@ function removeTaskHandler(evt) {
     const index = tasks.findIndex((task) => task.id === id)
     tasks.splice(index, 1)
 }
+
 function createTaskTemplate(task, index) {
     const priorityClass = task.priority === 'low' ? 
         'text-bg-info' : task.priority === 'medium' ? 'text-bg-warning' : 'text-bg-danger'
@@ -87,8 +89,8 @@ function createTaskTemplate(task, index) {
         </div>
         <div class="card-footer bg-transparent d-flex justify-content-end ${borderClass}">
             ${task.is_done ? 
-                '<button class="btn btn-outline-primary me-2">Reopen</button>' : 
-                '<button class="btn btn-success me-2">Mark as done</button>'
+                '<button class="btn btn-outline-primary me-2" data-action="reopen">Reopen</button>' : 
+                '<button class="btn btn-success me-2" data-action="done">Mark as done</button>'
             }
             <button class="btn btn-danger" data-action="remove">Remove</button>
         </div>
@@ -98,18 +100,51 @@ function createTaskTemplate(task, index) {
     return template
 } 
 
-const tasksContainer = document.querySelector('.tasks-list')
-let fullTemplate = ''
+function renderAllTasks() {
+    const fullTemplate = tasks.reduce((acc, task, index) => `${acc} ${createTaskTemplate(task, index)}`, '')
+    tasksContainer.insertAdjacentHTML('beforeend', fullTemplate)
+}
 
-// TODO change forEach to reduce
-tasks.forEach((task, index) => {
-    const template = createTaskTemplate(task, index)
-    fullTemplate += template
+renderAllTasks()
+
+tasksContainer.addEventListener('click', (evt) => {
+    const action = evt.target.dataset.action
+    if (!action) return
+
+    switch (action) {
+        case 'remove':
+            removeTaskHandler(evt)
+            break
+        case 'reopen':
+            console.log('call reopen func')
+            break
+        case 'done':
+            console.log('call done func')
+            break
+    }
 })
 
-tasksContainer.insertAdjacentHTML('beforeend', fullTemplate)
+const addTaskFormEl = document.forms['add-task']
+const inputTitleEl = addTaskFormEl.elements['task-title']
+const textareaDescriptionEl = addTaskFormEl.elements['task-description']
+const selectPriorityEl = addTaskFormEl.elements['task-priority']
 
-const removeBtns = document.querySelectorAll('[data-action="remove"]')
-removeBtns.forEach(
-    btn => btn.addEventListener('click', removeTaskHandler)
-)
+addTaskFormEl.addEventListener('submit', (evt) => {
+    evt.preventDefault()
+    
+    const newTask = {
+        id: tasks.length + 1,
+        title: inputTitleEl.value,
+        description: textareaDescriptionEl.value,
+        priority: selectPriorityEl.value,
+        is_done: false,
+        expired_at: Date.now() + (1000 * 60 * 60 * 24)
+    }
+
+    tasks.push(newTask)
+
+    const taskTemplate = createTaskTemplate(newTask, tasks.length - 1)
+    tasksContainer.insertAdjacentHTML('beforeend', taskTemplate)
+
+    addTaskFormEl.reset()
+})
