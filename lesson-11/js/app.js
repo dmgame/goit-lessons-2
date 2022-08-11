@@ -12,16 +12,16 @@
 const tasks = [
     {
         id: 1,
-        title: 'Primary card title',
-        description: "Some quick example text to build on the card title and make up the bulk of the card's content.",
+        title: 'Title JavaScript',
+        description: "JavaScript",
         priority: 'low',
         is_done: false,
         expired_at: 1659377827742
     },
     {
         id: 2,
-        title: 'Primary card title 2',
-        description: "Some quick example text to build on the card title and make up the bulk of the card's content.",
+        title: 'Title PHP',
+        description: "React",
         priority: 'medium',
         is_done: false,
         expired_at: 1659477600000
@@ -100,12 +100,16 @@ function createTaskTemplate(task, index) {
     return template
 } 
 
-function renderAllTasks() {
-    const fullTemplate = tasks.reduce((acc, task, index) => `${acc} ${createTaskTemplate(task, index)}`, '')
+function renderAllTasks(tasksList) {
+    const fullTemplate = tasksList.reduce((acc, task, index) => `${acc} ${createTaskTemplate(task, index)}`, '')
     tasksContainer.insertAdjacentHTML('beforeend', fullTemplate)
 }
 
-renderAllTasks()
+function cleareTasksContainer() {
+    tasksContainer.innerHTML = ''
+}
+
+renderAllTasks(tasks)
 
 tasksContainer.addEventListener('click', (evt) => {
     const action = evt.target.dataset.action
@@ -148,3 +152,57 @@ addTaskFormEl.addEventListener('submit', (evt) => {
 
     addTaskFormEl.reset()
 })
+
+const debounce = function(func, delay){
+    let timer;
+    return function () {
+        const args = arguments;
+        clearTimeout(timer); 
+        timer = setTimeout(()=> func(...args), delay);
+    }
+}
+
+const searchFormEl = document.forms['search-form']
+const searchInputEl = searchFormEl.elements['task-search']
+
+function searchTasks(value) {
+    const term = value.toLowerCase()
+    const filteredTasks = tasks.filter(({ title, description }) => 
+        title.toLowerCase().includes(term) ||
+        description.toLowerCase().includes(term)
+    )
+
+    cleareTasksContainer()
+    renderAllTasks(filteredTasks)
+}
+
+const searchTasksDebounced = debounce(searchTasks, 1000)
+
+searchInputEl.addEventListener('keyup', () => {
+    searchTasksDebounced(searchInputEl.value)
+})
+
+// const debounce = function(func, delay){
+//     let timer;
+//     return function () {
+//       const context = this; 
+//         const args = arguments;
+//         clearTimeout(timer); 
+//         timer = setTimeout(()=> {
+//             func.apply(context, args)
+//         },delay);
+//     }
+// }
+
+// const throttle = (func, limit) => {
+//     let inThrottle;
+//     return function() {
+//       const args = arguments;
+//       const context = this;
+//       if (!inThrottle) {
+//         func.apply(context, args);
+//         inThrottle = true;
+//         setTimeout(() => inThrottle = false, limit);
+//       }
+//     }
+//   }
