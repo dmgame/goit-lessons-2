@@ -1,50 +1,16 @@
-/**
- * id - String
- * title - String
- * description - String
- * priority - String
- * is_done - Boolean
- * is_archived - Boolean
- * expired_at - String
- */
+import { tasks } from './todos'
+import { debounce } from './utils'
+import UiElements from './elements'
+import Toastify from 'toastify-js'
 
-// TODO - Parse date
-const tasks = [
-    {
-        id: 1,
-        title: 'Title JavaScript',
-        description: "JavaScript",
-        priority: 'low',
-        is_done: false,
-        expired_at: 1659377827742
-    },
-    {
-        id: 2,
-        title: 'Title PHP',
-        description: "React",
-        priority: 'medium',
-        is_done: false,
-        expired_at: 1659477600000
-    },
-    {
-        id: 3,
-        title: 'Primary card title 3',
-        description: "Some quick example text to build on the card title and make up the bulk of the card's content.",
-        priority: 'medium',
-        is_done: true,
-        expired_at: 1659377827742
-    },
-    {
-        id: 4,
-        title: 'Primary card title 4',
-        description: "Some quick example text to build on the card title and make up the bulk of the card's content.",
-        priority: 'high',
-        is_done: false,
-        expired_at: 1659132000000
-    }
-]
-
-const tasksContainer = document.querySelector('.tasks-list')
+const {
+    tasksContainer,
+    addTaskFormEl,
+    inputTitleEl,
+    textareaDescriptionEl,
+    selectPriorityEl,
+    searchInputEl
+} = UiElements
 
 function removeTaskHandler(evt) {
     const { target } = evt
@@ -53,6 +19,10 @@ function removeTaskHandler(evt) {
     taskEl.remove()
 
     const index = tasks.findIndex((task) => task.id === id)
+    Toastify({
+        text: 'Task has been removed success',
+        duration: 5000
+    }).showToast()
     tasks.splice(index, 1)
 }
 
@@ -128,11 +98,6 @@ tasksContainer.addEventListener('click', (evt) => {
     }
 })
 
-const addTaskFormEl = document.forms['add-task']
-const inputTitleEl = addTaskFormEl.elements['task-title']
-const textareaDescriptionEl = addTaskFormEl.elements['task-description']
-const selectPriorityEl = addTaskFormEl.elements['task-priority']
-
 addTaskFormEl.addEventListener('submit', (evt) => {
     evt.preventDefault()
     
@@ -149,21 +114,12 @@ addTaskFormEl.addEventListener('submit', (evt) => {
 
     const taskTemplate = createTaskTemplate(newTask, tasks.length - 1)
     tasksContainer.insertAdjacentHTML('beforeend', taskTemplate)
-
+    Toastify({
+        text: 'Task has been added success',
+        duration: 5000
+    }).showToast()
     addTaskFormEl.reset()
 })
-
-const debounce = function(func, delay){
-    let timer;
-    return function () {
-        const args = arguments;
-        clearTimeout(timer); 
-        timer = setTimeout(()=> func(...args), delay);
-    }
-}
-
-const searchFormEl = document.forms['search-form']
-const searchInputEl = searchFormEl.elements['task-search']
 
 function searchTasks(value) {
     const term = value.toLowerCase()
@@ -181,28 +137,3 @@ const searchTasksDebounced = debounce(searchTasks, 1000)
 searchInputEl.addEventListener('keyup', () => {
     searchTasksDebounced(searchInputEl.value)
 })
-
-// const debounce = function(func, delay){
-//     let timer;
-//     return function () {
-//       const context = this; 
-//         const args = arguments;
-//         clearTimeout(timer); 
-//         timer = setTimeout(()=> {
-//             func.apply(context, args)
-//         },delay);
-//     }
-// }
-
-// const throttle = (func, limit) => {
-//     let inThrottle;
-//     return function() {
-//       const args = arguments;
-//       const context = this;
-//       if (!inThrottle) {
-//         func.apply(context, args);
-//         inThrottle = true;
-//         setTimeout(() => inThrottle = false, limit);
-//       }
-//     }
-//   }
