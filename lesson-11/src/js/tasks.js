@@ -1,4 +1,4 @@
-export const tasks = [
+export const tasksMock = [
     {
         id: 1,
         title: 'Title JavaScript',

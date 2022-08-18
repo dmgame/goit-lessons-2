@@ -1,5 +1,6 @@
-import { tasks } from './todos'
+import { getTasks, addNewTask, removeTask } from './tasksService'
 import { debounce } from './utils'
+import { TasksPriorityTypes, TasksActionTypes } from './constants'
 import UiElements from './elements'
 import Toastify from 'toastify-js'
 
@@ -12,23 +13,25 @@ const {
     searchInputEl
 } = UiElements
 
+const tasks = getTasks()
+
 function removeTaskHandler(evt) {
     const { target } = evt
     const taskEl = target.closest('[data-task-id]')
     const id = Number(taskEl.dataset.taskId)
     taskEl.remove()
 
-    const index = tasks.findIndex((task) => task.id === id)
+    removeTask(id)
+
     Toastify({
         text: 'Task has been removed success',
         duration: 5000
     }).showToast()
-    tasks.splice(index, 1)
 }
 
 function createTaskTemplate(task, index) {
-    const priorityClass = task.priority === 'low' ? 
-        'text-bg-info' : task.priority === 'medium' ? 'text-bg-warning' : 'text-bg-danger'
+    const priorityClass = task.priority === TasksPriorityTypes.Low ? 
+        'text-bg-info' : task.priority === TasksPriorityTypes.Medium ? 'text-bg-warning' : 'text-bg-danger'
     
     let borderClass
     let textBgClass
@@ -86,13 +89,13 @@ tasksContainer.addEventListener('click', (evt) => {
     if (!action) return
 
     switch (action) {
-        case 'remove':
+        case TasksActionTypes.Remove:
             removeTaskHandler(evt)
             break
-        case 'reopen':
+        case TasksActionTypes.Reopen:
             console.log('call reopen func')
             break
-        case 'done':
+        case TasksActionTypes.Done:
             console.log('call done func')
             break
     }
@@ -101,16 +104,11 @@ tasksContainer.addEventListener('click', (evt) => {
 addTaskFormEl.addEventListener('submit', (evt) => {
     evt.preventDefault()
     
-    const newTask = {
-        id: tasks.length + 1,
+    const newTask = addNewTask({
         title: inputTitleEl.value,
         description: textareaDescriptionEl.value,
         priority: selectPriorityEl.value,
-        is_done: false,
-        expired_at: Date.now() + (1000 * 60 * 60 * 24)
-    }
-
-    tasks.push(newTask)
+    })
 
     const taskTemplate = createTaskTemplate(newTask, tasks.length - 1)
     tasksContainer.insertAdjacentHTML('beforeend', taskTemplate)
