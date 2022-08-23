@@ -36,6 +36,8 @@ https://github.com/tc39
 
 [Каталог патернів проектування](https://refactoring.guru/uk/design-patterns/catalog)
 
+[Замыкания](https://medium.com/webbdev/closures-9a20e84b62cd)
+
 ### Приклад реаалізації методу sort за допомогую цикла
 ```js
  const numbers = [2, 5, 1, 7, 9, 3]
