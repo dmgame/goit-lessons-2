@@ -34,7 +34,10 @@
                                 <option value="high">High</option>
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-primary">Add task</button>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="spinner-grow spinner-grow-sm submit-loader d-none" role="status" aria-hidden="true"></span>
+                            Add task
+                        </button>
                         <button type="reset" class="btn btn-warning ms-2">Reset</button>
                     </form>
                 </div>
@@ -50,6 +53,11 @@
     </div>
     <section class="mt-5">
         <div class="container">
+            <div class="d-flex justify-content-center tasks-loader">
+                <div class="spinner-border" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
             <div class="tasks-list">
                 <!-- <div class="card mb-3">
                     <div class="card-header d-flex justify-content-between">

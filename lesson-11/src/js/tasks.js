@@ -5,7 +5,7 @@ export const tasksMock = [
         description: "JavaScript",
         priority: 'low',
         is_done: false,
-        expired_at: 1659377827742
+        expired_at: 1661192858595
     },
     {
         id: 2,
@@ -13,7 +13,7 @@ export const tasksMock = [
         description: "React",
         priority: 'medium',
         is_done: false,
-        expired_at: 1659477600000
+        expired_at: 1661192858595 + (1000 * 60 * 60 * 24)
     },
     {
         id: 3,

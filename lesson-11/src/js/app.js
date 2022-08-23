@@ -3,6 +3,7 @@ import { debounce } from './utils'
 import { TasksPriorityTypes, TasksActionTypes } from './constants'
 import UiElements from './elements'
 import Toastify from 'toastify-js'
+import dayjs from 'dayjs'
 
 const {
     tasksContainer,
@@ -10,7 +11,10 @@ const {
     inputTitleEl,
     textareaDescriptionEl,
     selectPriorityEl,
-    searchInputEl
+    searchInputEl,
+    tasksLoader,
+    buttonLoader,
+    submitButton
 } = UiElements
 
 const tasks = getTasks()
@@ -40,12 +44,17 @@ function createTaskTemplate(task, index) {
         borderClass = 'border-success'
         textBgClass = 'text-bg-success'
     }
-    const date = new Date(task.expired_at)
-    const dateText = task.is_done ? 'Done' : `Should be done: ${date.toLocaleString('en-EU', {
-        year: '2-digit',
-        month: 'numeric',
-        day: '2-digit'
-    })}`
+    console.log('==============',task.title,'============')
+    const isExpiredAfterToday = dayjs(task.expired_at).isAfter(Date.now(), 'day')
+    const isExpiredToday = dayjs(task.expired_at).isSame(Date.now(), 'day')
+    const isExpired = dayjs(task.expired_at).isBefore(dayjs(), 'day')
+    
+    console.log('isExpiredAfterToday', isExpiredAfterToday)
+    console.log('isExpiredToday', isExpiredToday)
+    console.log('isExpired', isExpired)
+    console.log('==============')
+    
+    const dateText = task.is_done ? 'Done' : `Should be done: ${dayjs(task.expired_at).format('DD.MM.YYYY')}`
 
     const template = `
     <div class="card mb-3 ${borderClass}" data-task-id="${task.id}">
@@ -82,7 +91,14 @@ function cleareTasksContainer() {
     tasksContainer.innerHTML = ''
 }
 
-renderAllTasks(tasks)
+function toggleTasksLoader() {
+    tasksLoader.classList.toggle('d-none')
+}
+
+function toogleButtonLoader() {
+    const isNotLoading = buttonLoader.classList.toggle('d-none')
+    submitButton.disabled = !isNotLoading
+}
 
 tasksContainer.addEventListener('click', (evt) => {
     const action = evt.target.dataset.action
@@ -103,20 +119,26 @@ tasksContainer.addEventListener('click', (evt) => {
 
 addTaskFormEl.addEventListener('submit', (evt) => {
     evt.preventDefault()
-    
-    const newTask = addNewTask({
-        title: inputTitleEl.value,
-        description: textareaDescriptionEl.value,
-        priority: selectPriorityEl.value,
-    })
+    // Show button Loader
+    toogleButtonLoader()
 
-    const taskTemplate = createTaskTemplate(newTask, tasks.length - 1)
-    tasksContainer.insertAdjacentHTML('beforeend', taskTemplate)
-    Toastify({
-        text: 'Task has been added success',
-        duration: 5000
-    }).showToast()
-    addTaskFormEl.reset()
+    setTimeout(() => {
+        const newTask = addNewTask({
+            title: inputTitleEl.value,
+            description: textareaDescriptionEl.value,
+            priority: selectPriorityEl.value,
+        })
+    
+        const taskTemplate = createTaskTemplate(newTask, tasks.length - 1)
+        tasksContainer.insertAdjacentHTML('afterbegin', taskTemplate)
+        Toastify({
+            text: 'Task has been added success',
+            duration: 5000
+        }).showToast()
+        addTaskFormEl.reset()
+        // Hide button loader
+        toogleButtonLoader()
+    }, 5000)
 })
 
 function searchTasks(value) {
@@ -135,3 +157,8 @@ const searchTasksDebounced = debounce(searchTasks, 1000)
 searchInputEl.addEventListener('keyup', () => {
     searchTasksDebounced(searchInputEl.value)
 })
+
+setTimeout(() => {
+    toggleTasksLoader()
+    renderAllTasks(tasks)
+}, 2000)

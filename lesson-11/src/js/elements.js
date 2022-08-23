@@ -5,6 +5,9 @@ const textareaDescriptionEl = addTaskFormEl.elements['task-description']
 const selectPriorityEl = addTaskFormEl.elements['task-priority']
 const searchFormEl = document.forms['search-form']
 const searchInputEl = searchFormEl.elements['task-search']
+const tasksLoader = document.querySelector('.tasks-loader')
+const buttonLoader = document.querySelector('.submit-loader')
+const submitButton = document.querySelector('[type="submit"]')
 
 export default {
     tasksContainer,
@@ -12,5 +15,8 @@ export default {
     inputTitleEl,
     textareaDescriptionEl,
     selectPriorityEl,
-    searchInputEl
+    searchInputEl,
+    tasksLoader,
+    buttonLoader,
+    submitButton
 }
