@@ -19,6 +19,8 @@ const {
 
 const tasks = getTasks()
 
+
+
 function removeTaskHandler(evt) {
     const { target } = evt
     const taskEl = target.closest('[data-task-id]')
@@ -44,15 +46,9 @@ function createTaskTemplate(task, index) {
         borderClass = 'border-success'
         textBgClass = 'text-bg-success'
     }
-    console.log('==============',task.title,'============')
     const isExpiredAfterToday = dayjs(task.expired_at).isAfter(Date.now(), 'day')
     const isExpiredToday = dayjs(task.expired_at).isSame(Date.now(), 'day')
     const isExpired = dayjs(task.expired_at).isBefore(dayjs(), 'day')
-    
-    console.log('isExpiredAfterToday', isExpiredAfterToday)
-    console.log('isExpiredToday', isExpiredToday)
-    console.log('isExpired', isExpired)
-    console.log('==============')
     
     const dateText = task.is_done ? 'Done' : `Should be done: ${dayjs(task.expired_at).format('DD.MM.YYYY')}`
 
@@ -100,6 +96,19 @@ function toogleButtonLoader() {
     submitButton.disabled = !isNotLoading
 }
 
+function submitNewTask() {
+    return new Promise(resolve => {
+        setTimeout(() => {
+            const newTask = addNewTask({
+                title: inputTitleEl.value,
+                description: textareaDescriptionEl.value,
+                priority: selectPriorityEl.value,
+            })
+            resolve(newTask)
+        }, 5000)
+    })
+}
+
 tasksContainer.addEventListener('click', (evt) => {
     const action = evt.target.dataset.action
     if (!action) return
@@ -122,23 +131,17 @@ addTaskFormEl.addEventListener('submit', (evt) => {
     // Show button Loader
     toogleButtonLoader()
 
-    setTimeout(() => {
-        const newTask = addNewTask({
-            title: inputTitleEl.value,
-            description: textareaDescriptionEl.value,
-            priority: selectPriorityEl.value,
+    submitNewTask()
+        .then(newTask => createTaskTemplate(newTask, tasks.length - 1))
+        .then(template => tasksContainer.insertAdjacentHTML('afterbegin', template))
+        .then(() => {
+            Toastify({
+                text: 'Task has been added success',
+                duration: 5000
+            }).showToast()
         })
-    
-        const taskTemplate = createTaskTemplate(newTask, tasks.length - 1)
-        tasksContainer.insertAdjacentHTML('afterbegin', taskTemplate)
-        Toastify({
-            text: 'Task has been added success',
-            duration: 5000
-        }).showToast()
-        addTaskFormEl.reset()
-        // Hide button loader
-        toogleButtonLoader()
-    }, 5000)
+        .then(() => addTaskFormEl.reset())
+        .finally(() => toogleButtonLoader())
 })
 
 function searchTasks(value) {
@@ -158,7 +161,17 @@ searchInputEl.addEventListener('keyup', () => {
     searchTasksDebounced(searchInputEl.value)
 })
 
-setTimeout(() => {
-    toggleTasksLoader()
-    renderAllTasks(tasks)
-}, 2000)
+function loadTasks() {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve(getTasks())
+        }, 2000);
+    })
+}
+
+loadTasks()
+    .then(tasks => {
+        toggleTasksLoader()
+        return tasks
+    })
+    .then((tasks) => renderAllTasks(tasks))
