@@ -22,9 +22,19 @@ https://github.com/tc39
 
 -----------------------
 
-## Common Links
+## YouTube
+
+[TraversyMedia](https://www.youtube.com/c/TraversyMedia)
+
+[Academind](https://www.youtube.com/c/Academind)
+
+[FreelancerLifeStyle](https://www.youtube.com/c/FreelancerLifeStyle/videos)
+
+[JavascriptNinja](https://www.youtube.com/c/JavascriptNinja)
 
 [Канал з співбесідами](https://www.youtube.com/c/otsobes)
+
+## Common Links
 
 [Візуалізация методу sort](https://www.hackerearth.com/practice/algorithms/sorting/bubble-sort/visualize/)
 
