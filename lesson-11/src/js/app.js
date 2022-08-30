@@ -5,6 +5,10 @@ import UiElements from './elements'
 import Toastify from 'toastify-js'
 import dayjs from 'dayjs'
 
+// TODO implement Reopen
+// TODO implement search
+// TODO implement pagination
+
 const {
     tasksContainer,
     addTaskFormEl,
@@ -19,30 +23,39 @@ const {
 
 const tasks = getTasks()
 
-
-
 function removeTaskHandler(evt) {
     const { target } = evt
     const taskEl = target.closest('[data-task-id]')
     const id = Number(taskEl.dataset.taskId)
-    taskEl.remove()
-
+    
     removeTask(id)
+        .then(() => {
+            taskEl.remove()
 
-    Toastify({
-        text: 'Task has been removed success',
-        duration: 5000
-    }).showToast()
+            Toastify({
+                text: 'Task has been removed success',
+                duration: 5000
+            }).showToast()
+        })
+        .catch(err => {
+            Toastify({
+                text: 'Remove todo error',
+                duration: 5000,
+                style: {
+                    background: "red",
+                }
+            }).showToast()
+        })
 }
 
-function createTaskTemplate(task, index) {
+function createTaskTemplate(task) {
     const priorityClass = task.priority === TasksPriorityTypes.Low ? 
         'text-bg-info' : task.priority === TasksPriorityTypes.Medium ? 'text-bg-warning' : 'text-bg-danger'
     
     let borderClass
     let textBgClass
     
-    if (task.is_done) {
+    if (task.completed) {
         borderClass = 'border-success'
         textBgClass = 'text-bg-success'
     }
@@ -50,23 +63,19 @@ function createTaskTemplate(task, index) {
     const isExpiredToday = dayjs(task.expired_at).isSame(Date.now(), 'day')
     const isExpired = dayjs(task.expired_at).isBefore(dayjs(), 'day')
     
-    const dateText = task.is_done ? 'Done' : `Should be done: ${dayjs(task.expired_at).format('DD.MM.YYYY')}`
+    const dateText = task.completed ? 'Done' : `Should be done: ${dayjs(task.expired_at).format('DD.MM.YYYY')}`
 
     const template = `
     <div class="card mb-3 ${borderClass}" data-task-id="${task.id}">
         <div class="card-header d-flex justify-content-between ${textBgClass}">
-            <span>Task #${index + 1}</span>
+            <span>Task #${task.id}</span>
             <span>${dateText}</span>
         </div>
         <div class="card-body">
             <h5 class="card-title">${task.title}</h5>
-            <p class="card-text">${task.description}</p>
-            <div>
-                <span class="badge ${priorityClass}">${task.priority}</span>
-            </div>
         </div>
         <div class="card-footer bg-transparent d-flex justify-content-end ${borderClass}">
-            ${task.is_done ? 
+            ${task.completed ? 
                 '<button class="btn btn-outline-primary me-2" data-action="reopen">Reopen</button>' : 
                 '<button class="btn btn-success me-2" data-action="done">Mark as done</button>'
             }
@@ -96,19 +105,6 @@ function toogleButtonLoader() {
     submitButton.disabled = !isNotLoading
 }
 
-function submitNewTask() {
-    return new Promise(resolve => {
-        setTimeout(() => {
-            const newTask = addNewTask({
-                title: inputTitleEl.value,
-                description: textareaDescriptionEl.value,
-                priority: selectPriorityEl.value,
-            })
-            resolve(newTask)
-        }, 5000)
-    })
-}
-
 tasksContainer.addEventListener('click', (evt) => {
     const action = evt.target.dataset.action
     if (!action) return
@@ -128,19 +124,28 @@ tasksContainer.addEventListener('click', (evt) => {
 
 addTaskFormEl.addEventListener('submit', (evt) => {
     evt.preventDefault()
-    // Show button Loader
     toogleButtonLoader()
 
-    submitNewTask()
-        .then(newTask => createTaskTemplate(newTask, tasks.length - 1))
-        .then(template => tasksContainer.insertAdjacentHTML('afterbegin', template))
-        .then(() => {
+    addNewTask({ title: inputTitleEl.value})
+        .then(res => {
+            console.log(res)
+            const template = createTaskTemplate(res.data)
+            tasksContainer.insertAdjacentHTML('afterbegin', template)
             Toastify({
                 text: 'Task has been added success',
                 duration: 5000
             }).showToast()
+            addTaskFormEl.reset()
         })
-        .then(() => addTaskFormEl.reset())
+        .catch(err => {
+            Toastify({
+                text: 'Add new task error',
+                duration: 5000,
+                style: {
+                    background: "red",
+                }
+            }).showToast()
+        })
         .finally(() => toogleButtonLoader())
 })
 
@@ -161,15 +166,7 @@ searchInputEl.addEventListener('keyup', () => {
     searchTasksDebounced(searchInputEl.value)
 })
 
-function loadTasks() {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve(getTasks())
-        }, 2000);
-    })
-}
-
-loadTasks()
+getTasks()
     .then(tasks => {
         toggleTasksLoader()
         return tasks
