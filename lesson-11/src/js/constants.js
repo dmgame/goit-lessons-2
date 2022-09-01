@@ -28,15 +28,3 @@ const QuestionnearFieldsMap = {
         questio2_21: ""
     }
 }
-
-// {
-//     questio_1: "",
-//     guestion_2: ""
-//     ...
-// }
-
-// {
-//     questio2_21: "",
-//     guestion3_24: ""
-//     ...
-// }

@@ -1,11 +1,12 @@
 import { getTasks, addNewTask, removeTask } from './tasksService'
 import { debounce } from './utils'
 import { TasksPriorityTypes, TasksActionTypes } from './constants'
+import Pagination from './pagination'
 import UiElements from './elements'
 import Toastify from 'toastify-js'
 import dayjs from 'dayjs'
 
-// TODO implement Reopen
+// TODO implement reopen
 // TODO implement search
 // TODO implement pagination
 
@@ -20,8 +21,6 @@ const {
     buttonLoader,
     submitButton
 } = UiElements
-
-const tasks = getTasks()
 
 function removeTaskHandler(evt) {
     const { target } = evt
@@ -128,7 +127,6 @@ addTaskFormEl.addEventListener('submit', (evt) => {
 
     addNewTask({ title: inputTitleEl.value})
         .then(res => {
-            console.log(res)
             const template = createTaskTemplate(res.data)
             tasksContainer.insertAdjacentHTML('afterbegin', template)
             Toastify({
@@ -151,13 +149,14 @@ addTaskFormEl.addEventListener('submit', (evt) => {
 
 function searchTasks(value) {
     const term = value.toLowerCase()
-    const filteredTasks = tasks.filter(({ title, description }) => 
-        title.toLowerCase().includes(term) ||
-        description.toLowerCase().includes(term)
-    )
+    console.log(term)
+    // const filteredTasks = tasks.filter(({ title, description }) => 
+    //     title.toLowerCase().includes(term) ||
+    //     description.toLowerCase().includes(term)
+    // )
 
-    cleareTasksContainer()
-    renderAllTasks(filteredTasks)
+    // cleareTasksContainer()
+    // renderAllTasks(filteredTasks)
 }
 
 const searchTasksDebounced = debounce(searchTasks, 1000)
@@ -167,8 +166,23 @@ searchInputEl.addEventListener('keyup', () => {
 })
 
 getTasks()
-    .then(tasks => {
+    .then(response => {
         toggleTasksLoader()
-        return tasks
+        return response
     })
-    .then((tasks) => renderAllTasks(tasks))
+    .then((response) => {
+        renderAllTasks(response.data)
+        return response
+    })
+    .then(({ total, limit }) => {
+        const totalPages = Math.ceil(total / limit)
+        const pagination = new Pagination({
+            currentPage: 1,
+            totalPages,
+            containerSelector: '.pagination-container',
+            onPageChange: (page) => {
+                console.log('page changed', page)
+            }
+        })
+        pagination.init()
+    })
