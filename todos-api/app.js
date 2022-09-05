@@ -56,12 +56,46 @@ app.delete('/api/todos/:id', (req, res) => {
     const { id } = req.params
     const todos = JSON.parse(fs.readFileSync(fileName));
     const index = todos.findIndex(t => t.id === id)
-    if (!index) {
+
+    if (index === -1) {
         res.status(500).send()
         return
     }
 
     todos.splice(index, 1)
+
+    const updatedJson = JSON.stringify(todos, null, 4)
+
+    fs.writeFile(
+        fileName,
+        updatedJson,
+        function (err) {
+            if (err) {
+                res.status(500).send()
+                return console.error(err);
+            }
+            console.log(updatedJson);
+            console.log('updated ' + fileName);
+
+            res.status(200).send()
+        }
+    );
+})
+
+app.patch('/api/todos/:id', (req, res) => {
+    const { id } = req.params
+    const todos = JSON.parse(fs.readFileSync(fileName));
+    const index = todos.findIndex(t => t.id === id)
+
+    if (index === -1) {
+        res.status(500).send()
+        return
+    }
+
+    todos[index] = {
+        ...todos[index],
+        ...req.body
+    }
 
     const updatedJson = JSON.stringify(todos, null, 4)
 

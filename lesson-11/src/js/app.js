@@ -1,4 +1,4 @@
-import { getTasks, addNewTask, removeTask } from './tasksService'
+import { getTasks, addNewTask, removeTask, updateTask } from './tasksService'
 import { debounce } from './utils'
 import { TasksPriorityTypes, TasksActionTypes } from './constants'
 import Pagination from './pagination'
@@ -6,7 +6,6 @@ import UiElements from './elements'
 import Toastify from 'toastify-js'
 import dayjs from 'dayjs'
 
-// TODO implement reopen
 // TODO implement search
 // TODO implement pagination
 
@@ -22,15 +21,9 @@ const {
     submitButton
 } = UiElements
 
-function removeTaskHandler(evt) {
-    const { target } = evt
-    const taskEl = target.closest('[data-task-id]')
-    const id = Number(taskEl.dataset.taskId)
-    
+function removeTaskHandler(id) {
     removeTask(id)
         .then(() => {
-            taskEl.remove()
-
             Toastify({
                 text: 'Task has been removed success',
                 duration: 5000
@@ -104,19 +97,76 @@ function toogleButtonLoader() {
     submitButton.disabled = !isNotLoading
 }
 
+function getTasksPerPage(page) {
+    const offset = (page - 1) * 10
+
+    cleareTasksContainer()
+    toggleTasksLoader()
+
+    getTasks(offset)
+        .then(response => {
+            toggleTasksLoader()
+            renderAllTasks(response.data)
+        })
+}
+
+function reopenTaskHandler(id) {
+    updateTask(id, { completed: false, expired_at: Date.now() + (1000 * 60 * 60 * 24) })
+        .then(() => {
+            Toastify({
+                text: 'Task has been reopened success',
+                duration: 5000
+            }).showToast()
+        })
+        .catch(err => {
+            Toastify({
+                text: 'Reopen todo error',
+                duration: 5000,
+                style: {
+                    background: "red",
+                }
+            }).showToast()
+        })
+}
+
+function markAsDoneTaskHandler(id) {
+    updateTask(id, { completed: true })
+        .then(() => {
+            Toastify({
+                text: 'Task has been done success',
+                duration: 5000
+            }).showToast()
+        })
+        .catch(err => {
+            Toastify({
+                text: 'Mark as done todo error',
+                duration: 5000,
+                style: {
+                    background: "red",
+                }
+            }).showToast()
+        })
+}
+
 tasksContainer.addEventListener('click', (evt) => {
     const action = evt.target.dataset.action
     if (!action) return
 
+    const { target } = evt
+    const taskEl = target.closest('[data-task-id]')
+    const id = taskEl.dataset.taskId
+
     switch (action) {
         case TasksActionTypes.Remove:
-            removeTaskHandler(evt)
+            removeTaskHandler(id)
+            taskEl.remove()
             break
         case TasksActionTypes.Reopen:
-            console.log('call reopen func')
+            reopenTaskHandler(id)
+            // replaceWith(newTodo)
             break
         case TasksActionTypes.Done:
-            console.log('call done func')
+            markAsDoneTaskHandler(id)
             break
     }
 })
@@ -180,9 +230,7 @@ getTasks()
             currentPage: 1,
             totalPages,
             containerSelector: '.pagination-container',
-            onPageChange: (page) => {
-                console.log('page changed', page)
-            }
+            onPageChange: (page) => getTasksPerPage(page)
         })
         pagination.init()
     })
