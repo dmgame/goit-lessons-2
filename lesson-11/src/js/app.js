@@ -1,13 +1,12 @@
 import { getTasks, addNewTask, removeTask, updateTask } from './tasksService'
 import { debounce } from './utils'
 import { TasksPriorityTypes, TasksActionTypes } from './constants'
+import Subscription from './Subscription'
 import Pagination from './pagination'
 import UiElements from './elements'
 import Toastify from 'toastify-js'
 import dayjs from 'dayjs'
 
-// TODO implement search
-// TODO implement pagination
 
 const {
     tasksContainer,
@@ -21,26 +20,34 @@ const {
     submitButton
 } = UiElements
 
-function removeTaskHandler(id) {
-    removeTask(id)
-        .then(() => {
-            Toastify({
-                text: 'Task has been removed success',
-                duration: 5000
-            }).showToast()
-        })
-        .catch(err => {
-            Toastify({
-                text: 'Remove todo error',
-                duration: 5000,
-                style: {
-                    background: "red",
-                }
-            }).showToast()
-        })
+const tasksUpdateEvent = new Subscription()
+
+async function reRenderTasksOnUpdate(data) {
+    console.log('reRenderTasksOnUpdate', data)
+}
+
+tasksUpdateEvent.subscribe(reRenderTasksOnUpdate)
+
+async function removeTaskHandler(id) {
+    try {
+        await removeTask(id)
+        Toastify({
+            text: 'Task removed success',
+            duration: 5000,
+        }).showToast()
+    } catch (e) {
+        Toastify({
+            text: 'Remove todo error',
+            duration: 5000,
+            style: {
+                background: "red",
+            }
+        }).showToast()
+    }
 }
 
 function createTaskTemplate(task) {
+    const container = document.createElement('div')
     const priorityClass = task.priority === TasksPriorityTypes.Low ? 
         'text-bg-info' : task.priority === TasksPriorityTypes.Medium ? 'text-bg-warning' : 'text-bg-danger'
     
@@ -58,13 +65,16 @@ function createTaskTemplate(task) {
     const dateText = task.completed ? 'Done' : `Should be done: ${dayjs(task.expired_at).format('DD.MM.YYYY')}`
 
     const template = `
-    <div class="card mb-3 ${borderClass}" data-task-id="${task.id}">
+    <div class="card mb-3 ${borderClass}">
         <div class="card-header d-flex justify-content-between ${textBgClass}">
             <span>Task #${task.id}</span>
             <span>${dateText}</span>
         </div>
         <div class="card-body">
             <h5 class="card-title">${task.title}</h5>
+            <div>
+                <span class="badge ${priorityClass}">${task.priority}</span>
+            </div>
         </div>
         <div class="card-footer bg-transparent d-flex justify-content-end ${borderClass}">
             ${task.completed ? 
@@ -76,12 +86,15 @@ function createTaskTemplate(task) {
     </div>
     `
 
-    return template
+    container.setAttribute('data-task-id', task.id)
+    container.insertAdjacentHTML('afterbegin', template)
+    return container
 } 
 
 function renderAllTasks(tasksList) {
-    const fullTemplate = tasksList.reduce((acc, task, index) => `${acc} ${createTaskTemplate(task, index)}`, '')
-    tasksContainer.insertAdjacentHTML('beforeend', fullTemplate)
+    const fragment = document.createDocumentFragment()
+    tasksList.forEach((task, index) => fragment.appendChild(createTaskTemplate(task, index)))
+    tasksContainer.appendChild(fragment)
 }
 
 function cleareTasksContainer() {
@@ -97,105 +110,60 @@ function toogleButtonLoader() {
     submitButton.disabled = !isNotLoading
 }
 
-function getTasksPerPage(page) {
-    const offset = (page - 1) * 10
+async function getTasksPerPage(page) {
+    try {
+        const offset = (page - 1) * 10
 
-    cleareTasksContainer()
-    toggleTasksLoader()
+        cleareTasksContainer()
+        toggleTasksLoader()
 
-    getTasks(offset)
-        .then(response => {
-            toggleTasksLoader()
-            renderAllTasks(response.data)
-        })
-}
-
-function reopenTaskHandler(id) {
-    updateTask(id, { completed: false, expired_at: Date.now() + (1000 * 60 * 60 * 24) })
-        .then(() => {
-            Toastify({
-                text: 'Task has been reopened success',
-                duration: 5000
-            }).showToast()
-        })
-        .catch(err => {
-            Toastify({
-                text: 'Reopen todo error',
-                duration: 5000,
-                style: {
-                    background: "red",
-                }
-            }).showToast()
-        })
-}
-
-function markAsDoneTaskHandler(id) {
-    updateTask(id, { completed: true })
-        .then(() => {
-            Toastify({
-                text: 'Task has been done success',
-                duration: 5000
-            }).showToast()
-        })
-        .catch(err => {
-            Toastify({
-                text: 'Mark as done todo error',
-                duration: 5000,
-                style: {
-                    background: "red",
-                }
-            }).showToast()
-        })
-}
-
-tasksContainer.addEventListener('click', (evt) => {
-    const action = evt.target.dataset.action
-    if (!action) return
-
-    const { target } = evt
-    const taskEl = target.closest('[data-task-id]')
-    const id = taskEl.dataset.taskId
-
-    switch (action) {
-        case TasksActionTypes.Remove:
-            removeTaskHandler(id)
-            taskEl.remove()
-            break
-        case TasksActionTypes.Reopen:
-            reopenTaskHandler(id)
-            // replaceWith(newTodo)
-            break
-        case TasksActionTypes.Done:
-            markAsDoneTaskHandler(id)
-            break
+        const respoonse = await getTasks(offset)
+        renderAllTasks(respoonse.data)
+    } catch (e) {
+        console.log('getTasksPerPage Error:', e)
+    } finally {
+        toggleTasksLoader()
     }
-})
+}
 
-addTaskFormEl.addEventListener('submit', (evt) => {
-    evt.preventDefault()
-    toogleButtonLoader()
+async function reopenTaskHandler(id) {
+    try {
+        const response = await updateTask(id, { completed: false, expired_at: Date.now() + (1000 * 60 * 60 * 24) })
+        Toastify({
+            text: 'Task has been reopened success',
+            duration: 5000
+        }).showToast()
 
-    addNewTask({ title: inputTitleEl.value})
-        .then(res => {
-            const template = createTaskTemplate(res.data)
-            tasksContainer.insertAdjacentHTML('afterbegin', template)
-            Toastify({
-                text: 'Task has been added success',
-                duration: 5000
-            }).showToast()
-            addTaskFormEl.reset()
-        })
-        .catch(err => {
-            Toastify({
-                text: 'Add new task error',
-                duration: 5000,
-                style: {
-                    background: "red",
-                }
-            }).showToast()
-        })
-        .finally(() => toogleButtonLoader())
-})
+        return response
+    } catch (e) {
+        Toastify({
+            text: 'Reopen todo error',
+            duration: 5000,
+            style: {
+                background: "red",
+            }
+        }).showToast()
+    }
+}
+
+async function markAsDoneTaskHandler(id) {
+    try {
+        const response = await updateTask(id, { completed: true })
+        Toastify({
+            text: 'Task has been done success',
+            duration: 5000
+        }).showToast()
+        return response
+    } catch (e) {
+        Toastify({
+            text: 'Mark as done todo error',
+            duration: 5000,
+            style: {
+                background: "red",
+            }
+        }).showToast()
+    }
+}
 
 function searchTasks(value) {
     const term = value.toLowerCase()
@@ -209,22 +177,71 @@ function searchTasks(value) {
     // renderAllTasks(filteredTasks)
 }
 
+tasksContainer.addEventListener('click', async (evt) => {
+    const action = evt.target.dataset.action
+    if (!action) return
+
+    const { target } = evt
+    const taskEl = target.closest('[data-task-id]')
+    const id = taskEl.dataset.taskId
+
+    switch (action) {
+        case TasksActionTypes.Remove:
+            removeTaskHandler(id)
+            taskEl.remove()
+            tasksUpdateEvent.notify({ type: 'remove' })
+            break
+        case TasksActionTypes.Reopen:
+            const reopenRes = await reopenTaskHandler(id)
+            taskEl.replaceWith(createTaskTemplate(reopenRes.data))
+            break
+        case TasksActionTypes.Done:
+            const doneRes = await markAsDoneTaskHandler(id)
+            taskEl.replaceWith(createTaskTemplate(doneRes.data))
+            break
+    }
+})
+
+addTaskFormEl.addEventListener('submit', async (evt) => {
+    evt.preventDefault()
+    toogleButtonLoader()
+
+    try {
+        const res = await addNewTask({ title: inputTitleEl.value })
+        const template = createTaskTemplate(res.data)
+        tasksContainer.insertAdjacentElement('afterbegin', template)
+        Toastify({
+            text: 'Task has been added success',
+            duration: 5000
+        }).showToast()
+        addTaskFormEl.reset()
+
+        tasksUpdateEvent.notify({ type: 'added' })
+    } catch (e) {
+        Toastify({
+            text: 'Add new task error',
+            duration: 5000,
+            style: {
+                background: "red",
+            }
+        }).showToast()
+    } finally {
+        toogleButtonLoader()
+    }
+})
+
 const searchTasksDebounced = debounce(searchTasks, 1000)
 
 searchInputEl.addEventListener('keyup', () => {
     searchTasksDebounced(searchInputEl.value)
 })
 
-getTasks()
-    .then(response => {
-        toggleTasksLoader()
-        return response
-    })
-    .then((response) => {
-        renderAllTasks(response.data)
-        return response
-    })
-    .then(({ total, limit }) => {
+async function mount() {
+    try {
+        const { data, total, limit } = await getTasks()
+        
+        renderAllTasks(data)
+
         const totalPages = Math.ceil(total / limit)
         const pagination = new Pagination({
             currentPage: 1,
@@ -233,4 +250,11 @@ getTasks()
             onPageChange: (page) => getTasksPerPage(page)
         })
         pagination.init()
-    })
+    } catch (e) {
+        console.log('Mount error', e)
+    } finally {
+        toggleTasksLoader()
+    }
+}
+
+mount()

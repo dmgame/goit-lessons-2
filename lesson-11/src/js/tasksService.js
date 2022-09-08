@@ -2,8 +2,9 @@ import { tasksMock } from './tasks'
 import { APP_TASKS_LS_KEY } from './constants'
 import axios from './axios'
 
-export function getTasks(offset = 0, limit = 10) {
-    return axios.get(`/todos`, { params: { offset, limit } }).then(res => res.data)
+export async function getTasks(offset = 0, limit = 10) {
+    const response = await axios.get(`/todos`, { params: { offset, limit } })
+    return response.data
 }
 
 export function addNewTask(payload) {
@@ -20,5 +21,5 @@ export function removeTask(id) {
 }
 
 export function updateTask(id, payload) {
-    return axios.patch(`/todos/${id}`, payload)
+    return axios.patch(`/todos/${id}`, payload).then(res => res.data)
 }

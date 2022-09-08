@@ -4,32 +4,24 @@
         "title": "My title",
         "description": "My Description",
         "priority": "low",
-        "completed": false,
-        "expired_at": 1662487841246
-    },
-    {
-        "id": "e865dedf-456d-4020-bebe-1a81934448df",
-        "title": "My title",
-        "description": "My Description",
-        "priority": "low",
         "completed": true,
-        "expired_at": 1661973956142
+        "expired_at": 1662660231708
     },
     {
         "id": "0b81677b-ae34-40bb-a723-d0d8b04ae10b",
         "title": "My title",
         "description": "My Description",
         "priority": "low",
-        "completed": false,
-        "expired_at": 1661973956997
+        "completed": true,
+        "expired_at": 1662656484976
     },
     {
         "id": "c2e72356-1586-4b14-b778-ae4825a7dc0f",
         "title": "My title",
         "description": "My Description",
         "priority": "low",
-        "completed": false,
-        "expired_at": 1661973957707
+        "completed": true,
+        "expired_at": 1662655902182
     },
     {
         "id": "aaed5710-fb48-464a-af52-01a546bd4e68",
@@ -54,13 +46,5 @@
         "priority": "low",
         "completed": false,
         "expired_at": 1661973959975
-    },
-    {
-        "id": "fa753cb8-c2b3-40a2-b23d-48a317924b24",
-        "title": "My title",
-        "description": "My Description",
-        "priority": "low",
-        "completed": false,
-        "expired_at": 1661973960769
     }
 ]

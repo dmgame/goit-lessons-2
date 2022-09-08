@@ -110,7 +110,7 @@ app.patch('/api/todos/:id', (req, res) => {
             console.log(updatedJson);
             console.log('updated ' + fileName);
 
-            res.status(200).send()
+            res.status(200).send({ status: 'success', data: todos[index] })
         }
     );
 })
