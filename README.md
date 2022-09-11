@@ -1,5 +1,9 @@
 # GoIt JavaScript Group 49
 
+## Питання на інтервью
+
+[Питання](https://docs.google.com/document/d/14wcAePh977kmvT_bWbUn-a72O2ZZ-Tyg/edit?usp=sharing&ouid=104515070505499730588&rtpof=true&sd=true)
+
 ## Сайти із завданнями
 https://proghub.dev/
 
@@ -33,6 +37,18 @@ https://github.com/tc39
 [JavascriptNinja](https://www.youtube.com/c/JavascriptNinja)
 
 [Канал з співбесідами](https://www.youtube.com/c/otsobes)
+
+## Videos
+
+[Object descriptor](https://vimeo.com/346693257/b7711f7e30)
+
+[Object wrappers](https://vimeo.com/345836585/08905c514c)
+
+[Замыкания](https://vimeo.com/345836732/8d8a42e0d4)
+
+[Interceptors.](https://vimeo.com/369149275/ca8124687e)
+
+[Питання з співбесіди.](https://vimeo.com/369141498/eb855eaf86)
 
 ## Common Links
 
